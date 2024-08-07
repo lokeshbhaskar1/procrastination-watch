@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.strokeStyle = '#0000FF'; // Default circle border color
             ctx.stroke(); // Draw circle border
             if (index === highlightIndex) {
-                ctx.fillStyle = colors[highlightIndex % colors.length]; // Fill highlighted segment
+                ctx.fillStyle = colors[index % colors.length]; // Fill highlighted segment
                 ctx.fill();
             }
         });
@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', function () {
             { start: Math.PI, end: 1.5 * Math.PI },
             { start: 1.5 * Math.PI, end: 2 * Math.PI }
         ];
-        drawCircleSegments('threeHourCanvas', segments, segmentIndex, ['red']);
+        const colors = ['red', 'green', 'blue', 'yellow']; // Different colors for each segment
+        drawCircleSegments('threeHourCanvas', segments, segmentIndex, colors);
     }
 
     function updateTenMinuteIntervals() {
