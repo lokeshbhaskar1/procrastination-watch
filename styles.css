@@ -1,5 +1,5 @@
 body {
-    background-color: #ffffe0; /* light yellow */
+    background-color: #ffffe0;
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
@@ -10,36 +10,40 @@ body {
     justify-content: center;
 }
 
-#main-container {
-    text-align: center;
-    width: 80%;
-    margin: 20px auto;
+/* New Counter Styles */
+.counter-box {
+    position: fixed;
+    top: 20px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    font-size: 18px;
+    z-index: 1000;
 }
 
-h1 {
-    color: darkblue;
-    margin-bottom: 20px;
+#day-counter {
+    left: 20px;
 }
 
-#life-overview p {
-    font-size: 20px;
-    color: black;
+#week-counter {
+    right: 20px;
 }
 
-.circle {
-    width: 300px;
-    height: 300px;
-    margin: 20px;
-    position: relative;
-    display: inline-block;
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
 }
 
-#three-hour-segments h2, #ten-minute-intervals h2 {
-    color: #000;
-    margin-top: 0;
+.blink {
+    animation: blink 3s infinite;
 }
 
-canvas {
-    width: 100%;
-    height: 100%;
-}
+/* Rest of existing CSS */
+#main-container { text-align: center; width: 80%; margin: 20px auto; }
+h1 { color: darkblue; margin-bottom: 20px; }
+#life-overview p { font-size: 20px; color: black; }
+.circle { width: 300px; height: 300px; margin: 20px; position: relative; display: inline-block; }
+#three-hour-segments h2, #ten-minute-intervals h2 { color: #000; margin-top: 0; }
+canvas { width: 100%; height: 100%; }
