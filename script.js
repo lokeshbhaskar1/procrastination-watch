@@ -1,104 +1,117 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Constants for life calculations
-    const birthdate = new Date('1992-12-08'); // Your birthdate
-    const retirementAge = 42; // Retirement at 42 years
-    const retirementDate = new Date(birthdate.getFullYear() + retirementAge, birthdate.getMonth(), birthdate.getDate()); // Retirement date: Dec 8, 2034
-    const countdownStartDate = new Date('2025-01-31'); // Start date for 400-week countdown
+    // Constants and Color Pools
+    const birthdate = new Date('1992-12-08');
+    const retirementAge = 42;
+    const countdownStartDate = new Date('2025-01-31');
+    
+    // Color configuration
+    const quadrantColors = ['#FF0000', '#00FF00', '#0000FF', '#FFD700', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
+    const sectorColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5'];
+    let lastQuadrantColor = null;
+    let lastSectorColor = null;
 
-    // Function to calculate weeks between two dates
-    function getWeeksBetween(startDate, endDate) {
-        const timeDiff = endDate - startDate;
-        return Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 7));
-    }
-
-    // Update life overview (weeks left and percentage wasted)
-    function updateLifeOverview() {
-        const today = new Date(); // Current date
+    // Counter functions
+    function getDayPercentage() {
+        const now = new Date();
+        const currentHour = now.getHours();
         
-        // Calculate weeks left until retirement (400 weeks from Jan 31, 2025)
-        const weeksPassedSinceCountdownStart = getWeeksBetween(countdownStartDate, today);
-        const weeksLeft = 400 - weeksPassedSinceCountdownStart;
+        // Handle inactive hours (3 AM - 9 AM)
+        if (currentHour >= 3 && currentHour < 9) {
+            document.getElementById('day-percentage').classList.add('blink');
+            return '--';
+        }
+        document.getElementById('day-percentage').classList.remove('blink');
 
-        // Calculate percentage of life "wasted" (used) until today
-        const totalLifeWeeks = retirementAge * 52; // 42 years in weeks
-        const weeksPassedSinceBirth = getWeeksBetween(birthdate, today);
-        const percentageWasted = (weeksPassedSinceBirth / totalLifeWeeks) * 100;
+        // Calculate active day progress (9 AM - 3 AM)
+        const today9AM = new Date(now);
+        today9AM.setHours(9, 0, 0, 0);
+        
+        const activeDayStart = now < today9AM ? 
+            new Date(today9AM.setDate(today9AM.getDate() - 1)) : 
+            today9AM;
 
-        // Update the display
-        document.getElementById('weeks-left').textContent = `Weeks Left: ${Math.max(weeksLeft, 0)}`;
-        document.getElementById('percentage-wasted').textContent = `Percentage of Life Wasted: ${percentageWasted.toFixed(2)}%`;
+        const activeDayEnd = new Date(activeDayStart);
+        activeDayEnd.setHours(activeDayStart.getHours() + 18);
+
+        const elapsed = Math.min(now - activeDayStart, activeDayEnd - activeDayStart);
+        return ((elapsed / (18 * 60 * 60 * 1000)) * 100).toFixed(2);
     }
 
-    // Clock functions (unchanged from your original code)
-    function setupCanvas(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        canvas.width = 300;
-        canvas.height = 300;
-        return canvas;
+    function getWeekPercentage() {
+        const now = new Date();
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        monday.setHours(0, 0, 0, 0);
+        
+        const weekProgress = now - monday;
+        return ((weekProgress / (7 * 24 * 60 * 60 * 1000)) * 100).toFixed(2);
     }
 
-    function drawCircleSegments(canvasId, segments, highlightIndex, colors) {
-        const canvas = setupCanvas(canvasId);
-        const ctx = canvas.getContext('2d');
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const radius = centerX - 10;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.lineWidth = 2;
-
-        segments.forEach((segment, index) => {
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, segment.start - Math.PI / 2, segment.end - Math.PI / 2, false);
-            ctx.closePath();
-            ctx.strokeStyle = '#0000FF';
-            ctx.stroke();
-            if (index === highlightIndex) {
-                ctx.fillStyle = colors[index % colors.length];
-                ctx.fill();
-            }
-        });
+    // Clock functions with dynamic colors
+    function getNonConsecutiveColor(pool, lastColor) {
+        let newColor;
+        do {
+            newColor = pool[Math.floor(Math.random() * pool.length)];
+        } while (newColor === lastColor);
+        return newColor;
     }
 
     function updateThreeHourSegments() {
         const date = new Date();
         const currentHour = date.getHours();
         const segmentIndex = Math.floor(currentHour / 3) % 4;
-        const segments = [
-            { start: 0, end: Math.PI / 2 },
-            { start: Math.PI / 2, end: Math.PI },
-            { start: Math.PI, end: 1.5 * Math.PI },
-            { start: 1.5 * Math.PI, end: 2 * Math.PI }
-        ];
-        const colors = ['red', 'green', 'blue', 'yellow'];
-        drawCircleSegments('threeHourCanvas', segments, segmentIndex, colors);
+        
+        // Generate new colors ensuring no consecutive duplicates
+        const colors = [];
+        for (let i = 0; i < 4; i++) {
+            lastQuadrantColor = getNonConsecutiveColor(quadrantColors, lastQuadrantColor);
+            colors.push(lastQuadrantColor);
+        }
+
+        drawCircleSegments('threeHourCanvas', [
+            { start: 0, end: Math.PI/2 },
+            { start: Math.PI/2, end: Math.PI },
+            { start: Math.PI, end: 1.5*Math.PI },
+            { start: 1.5*Math.PI, end: 2*Math.PI }
+        ], segmentIndex, colors);
     }
 
     function updateTenMinuteIntervals() {
         const date = new Date();
         const currentMinute = date.getMinutes();
         const segmentIndex = Math.floor(currentMinute / 10);
-        const segments = [
-            { start: 0, end: Math.PI / 3 },
-            { start: Math.PI / 3, end: 2 * Math.PI / 3 },
-            { start: 2 * Math.PI / 3, end: Math.PI },
-            { start: Math.PI, end: 4 * Math.PI / 3 },
-            { start: 4 * Math.PI / 3, end: 5 * Math.PI / 3 },
-            { start: 5 * Math.PI / 3, end: 2 * Math.PI }
-        ];
-        const colors = ['red', 'green', 'blue', 'yellow', 'purple', 'orange'];
-        drawCircleSegments('tenMinuteCanvas', segments, segmentIndex, colors);
+        
+        // Generate new colors for sectors
+        const colors = [];
+        for (let i = 0; i < 6; i++) {
+            lastSectorColor = getNonConsecutiveColor(sectorColors, lastSectorColor);
+            colors.push(lastSectorColor);
+        }
+
+        drawCircleSegments('tenMinuteCanvas', [
+            { start: 0, end: Math.PI/3 },
+            { start: Math.PI/3, end: 2*Math.PI/3 },
+            { start: 2*Math.PI/3, end: Math.PI },
+            { start: Math.PI, end: 4*Math.PI/3 },
+            { start: 4*Math.PI/3, end: 5*Math.PI/3 },
+            { start: 5*Math.PI/3, end: 2*Math.PI }
+        ], segmentIndex, colors);
     }
 
-    // Initialize everything
-    updateLifeOverview();
+    // Existing functions (keep these unchanged)
+    function setupCanvas(canvasId) { /* ... */ }
+    function drawCircleSegments(canvasId, segments, highlightIndex, colors) { /* ... */ }
+    function updateLifeOverview() { /* ... */ }
+
+    // Initialize with 1 second interval for smoother blink
+    setInterval(() => {
+        document.getElementById('day-percentage').textContent = getDayPercentage();
+        document.getElementById('week-percentage').textContent = getWeekPercentage();
+        updateLifeOverview();
+    }, 1000);
+    
     updateThreeHourSegments();
     updateTenMinuteIntervals();
-
-    // Update clock every minute
     setInterval(updateThreeHourSegments, 60000);
     setInterval(updateTenMinuteIntervals, 60000);
-
-    // Update life stats every hour (optional)
-    setInterval(updateLifeOverview, 3600000); // 1 hour
 });
