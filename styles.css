@@ -13,7 +13,7 @@ body {
 /* Counters */
 .counter-box {
     position: fixed;
-    top: 10px;
+    top: 50px; /* 🔹 Pushed down by 1 inch (~25-30px) */
     padding: 8px 16px;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 10px;
@@ -44,7 +44,7 @@ body {
 #main-container {
     text-align: center;
     width: 80%;
-    margin-top: -40px; /* Moves everything up */
+    margin-top: -40px;
     position: relative;
 }
 
@@ -60,16 +60,16 @@ h1 {
     margin: 10px 0;
 }
 
-/* Circle container to keep both circles side by side */
+/* Circle container: keeps circles side by side */
 .circle-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 40px; /* Space between the two circles */
+    gap: 40px;
     margin-top: 10px;
 }
 
-/* Individual circle boxes */
+/* Each circle box contains the heading and canvas */
 .circle-box {
     display: flex;
     flex-direction: column;
@@ -77,16 +77,16 @@ h1 {
     text-align: center;
 }
 
+/* 🔹 Ensure headings are above circles */
+.circle-title {
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
 /* Circles */
 .circle-box canvas {
     width: 300px;
     height: 300px;
     display: block;
-}
-
-/* Time labels */
-.circle-box h2 {
-    margin-bottom: 10px;
-    font-size: 18px;
-    font-weight: bold;
 }
