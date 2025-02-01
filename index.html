@@ -9,23 +9,32 @@
 <body>
     <div class="counter-box" id="day-counter">% of Day Wasted: <span id="day-percentage">--</span>%</div>
     <div class="counter-box" id="week-counter">% of Week Wasted: <span id="week-percentage">0.00</span>%</div>
+    
     <div id="main-container">
         <h1>Procrastination Watch</h1>
+        
         <div id="life-overview">
             <p id="weeks-left">Weeks Left: </p>
             <p id="percentage-wasted">Percentage of Life Wasted: </p>
         </div>
+
         <div id="time-sections">
-            <div class="circle" id="three-hour-segments">
-                <h2>3-Hour Segments</h2>
-                <canvas id="threeHourCanvas"></canvas>
-            </div>
-            <div class="circle" id="ten-minute-intervals">
-                <h2>10-Minute Intervals</h2>
-                <canvas id="tenMinuteCanvas"></canvas>
+            <!-- Labels -->
+            <h2 class="time-label">3-Hour Segments</h2>
+            <h2 class="time-label">10-Minute Intervals</h2>
+
+            <!-- Circles -->
+            <div class="time-row">
+                <div class="circle">
+                    <canvas id="threeHourCanvas"></canvas>
+                </div>
+                <div class="circle">
+                    <canvas id="tenMinuteCanvas"></canvas>
+                </div>
             </div>
         </div>
     </div>
+    
     <script src="script.js"></script>
 </body>
 </html>
