@@ -60,11 +60,35 @@ h1 {
     margin: 10px 0;
 }
 
+/* Time sections */
+#time-sections {
+    display: flex;
+    flex-direction: column; /* Stack headings above circles */
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+/* Time labels */
+.time-label {
+    margin-bottom: 10px; /* Space between labels and circles */
+    font-size: 18px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Row for circles */
+.time-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Adds space between circles */
+}
+
 /* Circles */
 .circle {
     width: 300px;
     height: 300px;
-    margin: 10px;
     position: relative;
     display: flex;
     align-items: center;
@@ -76,20 +100,4 @@ canvas {
     width: 300px;
     height: 300px;
     display: block;
-}
-
-/* Time sections */
-#time-sections {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: 10px; /* Moved sections closer */
-}
-
-#time-sections h2 {
-    margin-top: 10px;
-    margin-bottom: 20px; /* Add more space to separate labels from circles */
-    font-size: 18px;
-    text-align: center;
 }
