@@ -61,21 +61,20 @@ h1 {
 
 /* Circles */
 .circle {
-    width: 320px; /* Slightly increased */
-    height: 320px; /* Slightly increased */
+    width: 300px;
+    height: 300px;
     margin: 20px;
     position: relative;
-    display: inline-block;
-    overflow: visible; /* Ensures nothing is hidden */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible; /* Ensures full visibility */
 }
 
 canvas {
-    width: 100%;
-    height: 100%;
+    width: 300px; /* Fixed width */
+    height: 300px; /* Fixed height */
     display: block;
-    margin: 0 auto;
-    padding-bottom: 10px; /* Prevents bottom cutoff */
-    box-sizing: border-box;
 }
 
 /* Time sections */
