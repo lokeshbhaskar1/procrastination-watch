@@ -44,7 +44,7 @@ body {
 #main-container {
     text-align: center;
     width: 80%;
-    transform: translateY(-12%);
+    margin-top: -40px; /* Move everything up */
     position: relative;
 }
 
@@ -87,9 +87,9 @@ canvas {
     margin-top: 10px; /* Moved sections closer */
 }
 
-h2 {
-    margin: 8px 0;
+#time-sections h2 {
+    margin-top: 10px;
+    margin-bottom: 20px; /* Add more space to separate labels from circles */
     font-size: 18px;
-    color: #2c3e50;
     text-align: center;
 }
