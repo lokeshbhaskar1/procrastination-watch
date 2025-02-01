@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Constants (ensure valid dates)
-    const birthdate = new Date('1992-12-08T00:00:00'); // Explicit timezone handling
+    // Constants
+    const birthdate = new Date('1992-12-08T00:00:00');
     const retirementAge = 42;
     const countdownStartDate = new Date('2025-01-31T00:00:00');
     
@@ -10,13 +10,13 @@ document.addEventListener('DOMContentLoaded', function () {
     let lastQuadrantColor = null;
     let lastSectorColor = null;
 
-    // Helper: Weeks between dates (fixed)
+    // Helper: Weeks between dates
     function getWeeksBetween(startDate, endDate) {
         const timeDiff = endDate.getTime() - startDate.getTime();
         return Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 7));
     }
 
-    // Day counter (fixed 9 AM logic)
+    // Day counter
     function getDayPercentage() {
         const now = new Date();
         const currentHour = now.getHours();
@@ -29,11 +29,10 @@ document.addEventListener('DOMContentLoaded', function () {
             dayPercentageElement.classList.remove('blink');
         }
 
-        // Calculate active day (9 AM to 3 AM next day)
         const today9AM = new Date(now);
         today9AM.setHours(9, 0, 0, 0);
         const activeDayStart = now < today9AM ? 
-            new Date(today9AM.getTime() - 86400000) : // Previous day 9 AM
+            new Date(today9AM.getTime() - 86400000) : 
             today9AM;
 
         const activeDayEnd = new Date(activeDayStart.getTime() + 18 * 60 * 60 * 1000);
@@ -41,18 +40,18 @@ document.addEventListener('DOMContentLoaded', function () {
         return ((timePassed / (18 * 60 * 60 * 1000)) * 100).toFixed(2);
     }
 
-    // Week counter (fixed Monday start)
+    // Week counter
     function getWeekPercentage() {
         const now = new Date();
         const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7)); // Monday
+        startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
         startOfWeek.setHours(0, 0, 0, 0);
         const weekDuration = 7 * 24 * 60 * 60 * 1000;
         const timePassed = now - startOfWeek;
         return ((timePassed / weekDuration) * 100).toFixed(2);
     }
 
-    // Clock color logic (no repeats)
+    // Clock color logic
     function getNonConsecutiveColor(colors, lastColor) {
         let newColor;
         do {
@@ -61,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return newColor;
     }
 
-    // 3-hour clock (fixed color assignment)
+    // 3-hour clock
     function updateThreeHourSegments() {
         const date = new Date();
         const currentHour = date.getHours();
@@ -81,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ], segmentIndex, colors);
     }
 
-    // 10-minute clock (fixed color assignment)
+    // 10-minute clock
     function updateTenMinuteIntervals() {
         const date = new Date();
         const currentMinute = date.getMinutes();
@@ -103,42 +102,52 @@ document.addEventListener('DOMContentLoaded', function () {
         ], segmentIndex, colors);
     }
 
-    // Canvas drawing (fixed fill logic)
-    function drawCircleSegments(canvasId, segments, highlightIndex, colors) {
+    // Canvas drawing
+    function setupCanvas(canvasId) {
         const canvas = document.getElementById(canvasId);
+        const displayWidth = canvas.clientWidth;
+        const displayHeight = canvas.clientHeight;
+
+        if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+            canvas.width = displayWidth;
+            canvas.height = displayHeight;
+        }
+
+        return canvas;
+    }
+
+    function drawCircleSegments(canvasId, segments, highlightIndex, colors) {
+        const canvas = setupCanvas(canvasId);
         const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
-        const radius = centerX - 10;
-        
+        const radius = Math.min(centerX, centerY) - 10;
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 2;
 
         segments.forEach((segment, index) => {
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, segment.start - Math.PI/2, segment.end - Math.PI/2, false);
+            ctx.arc(centerX, centerY, radius, segment.start - Math.PI / 2, segment.end - Math.PI / 2, false);
             ctx.closePath();
             ctx.strokeStyle = '#0000FF';
             ctx.stroke();
-            
+
             if (index === highlightIndex) {
                 ctx.fillStyle = colors[index];
-                ctx.fill(); // Ensure fill is applied
+                ctx.fill();
             }
         });
     }
 
-    // Life overview (fixed NaN issues)
+    // Life overview
     function updateLifeOverview() {
         const today = new Date();
-        
-        // Weeks left
         const weeksPassed = getWeeksBetween(countdownStartDate, today);
         const weeksLeft = 400 - weeksPassed;
         document.getElementById('weeks-left').textContent = `Weeks Left: ${Math.max(weeksLeft, 0)}`;
         
-        // Life wasted
         const totalLifeWeeks = retirementAge * 52;
         const weeksLived = getWeeksBetween(birthdate, today);
         const lifeWasted = (weeksLived / totalLifeWeeks * 100).toFixed(2);
