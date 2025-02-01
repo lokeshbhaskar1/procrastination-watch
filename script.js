@@ -3,12 +3,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const birthdate = new Date('1992-12-08T00:00:00');
     const retirementAge = 42;
     const countdownStartDate = new Date('2025-01-31T00:00:00');
-    
+
     // Color pools
     const quadrantColors = ['#FF0000', '#00FF00', '#0000FF', '#FFD700', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
     const sectorColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5'];
+
     let lastQuadrantColor = null;
     let lastSectorColor = null;
+    let currentQuadrantIndex = -1;  // Track last quadrant
+    let currentSectorIndex = -1;    // Track last sector
 
     // Helper: Weeks between dates
     function getWeeksBetween(startDate, endDate) {
@@ -63,43 +66,41 @@ document.addEventListener('DOMContentLoaded', function () {
     // 3-hour clock
     function updateThreeHourSegments() {
         const date = new Date();
-        const currentHour = date.getHours();
-        const segmentIndex = Math.floor(currentHour / 3) % 4;
+        const newQuadrantIndex = Math.floor(date.getHours() / 3); // 0 to 7
         
-        const colors = [];
-        for (let i = 0; i < 4; i++) {
+        // Change color only if quadrant changed
+        if (newQuadrantIndex !== currentQuadrantIndex) {
+            currentQuadrantIndex = newQuadrantIndex;
             lastQuadrantColor = getNonConsecutiveColor(quadrantColors, lastQuadrantColor);
-            colors.push(lastQuadrantColor);
         }
 
         drawCircleSegments('threeHourCanvas', [
-            { start: 0, end: Math.PI/2 },
-            { start: Math.PI/2, end: Math.PI },
-            { start: Math.PI, end: 1.5*Math.PI },
-            { start: 1.5*Math.PI, end: 2*Math.PI }
-        ], segmentIndex, colors);
+            { start: 0, end: Math.PI / 2 },
+            { start: Math.PI / 2, end: Math.PI },
+            { start: Math.PI, end: 1.5 * Math.PI },
+            { start: 1.5 * Math.PI, end: 2 * Math.PI }
+        ], newQuadrantIndex % 4, [lastQuadrantColor, '#ddd', '#ddd', '#ddd']);
     }
 
     // 10-minute clock
     function updateTenMinuteIntervals() {
         const date = new Date();
-        const currentMinute = date.getMinutes();
-        const segmentIndex = Math.floor(currentMinute / 10);
+        const newSectorIndex = Math.floor(date.getMinutes() / 10); // 0 to 5
         
-        const colors = [];
-        for (let i = 0; i < 6; i++) {
+        // Change color only if sector changed
+        if (newSectorIndex !== currentSectorIndex) {
+            currentSectorIndex = newSectorIndex;
             lastSectorColor = getNonConsecutiveColor(sectorColors, lastSectorColor);
-            colors.push(lastSectorColor);
         }
 
         drawCircleSegments('tenMinuteCanvas', [
-            { start: 0, end: Math.PI/3 },
-            { start: Math.PI/3, end: 2*Math.PI/3 },
-            { start: 2*Math.PI/3, end: Math.PI },
-            { start: Math.PI, end: 4*Math.PI/3 },
-            { start: 4*Math.PI/3, end: 5*Math.PI/3 },
-            { start: 5*Math.PI/3, end: 2*Math.PI }
-        ], segmentIndex, colors);
+            { start: 0, end: Math.PI / 3 },
+            { start: Math.PI / 3, end: 2 * Math.PI / 3 },
+            { start: 2 * Math.PI / 3, end: Math.PI },
+            { start: Math.PI, end: 4 * Math.PI / 3 },
+            { start: 4 * Math.PI / 3, end: 5 * Math.PI / 3 },
+            { start: 5 * Math.PI / 3, end: 2 * Math.PI }
+        ], newSectorIndex, [lastSectorColor, '#ddd', '#ddd', '#ddd', '#ddd', '#ddd']);
     }
 
     // Canvas drawing
@@ -135,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.stroke();
 
             if (index === highlightIndex) {
-                ctx.fillStyle = colors[index];
+                ctx.fillStyle = colors[0];
                 ctx.fill();
             }
         });
