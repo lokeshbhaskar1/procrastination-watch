@@ -44,7 +44,7 @@ body {
 #main-container {
     text-align: center;
     width: 80%;
-    margin-top: 40px; /* Reduced from 80px to move everything up */
+    margin-top: 20px; /* Reduced from 80px to move everything up */
 }
 
 h1 {
