@@ -1,27 +1,27 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Constants
-    const birthdate = new Date('1992-12-08');
+    // Constants (ensure valid dates)
+    const birthdate = new Date('1992-12-08T00:00:00'); // Explicit timezone handling
     const retirementAge = 42;
-    const countdownStartDate = new Date('2025-01-31');
+    const countdownStartDate = new Date('2025-01-31T00:00:00');
     
-    // Color pools (8 colors for quadrants, 6 for sectors)
+    // Color pools
     const quadrantColors = ['#FF0000', '#00FF00', '#0000FF', '#FFD700', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
     const sectorColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5'];
     let lastQuadrantColor = null;
     let lastSectorColor = null;
 
-    // Helper: Weeks between dates
+    // Helper: Weeks between dates (fixed)
     function getWeeksBetween(startDate, endDate) {
-        return Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24 * 7));
+        const timeDiff = endDate.getTime() - startDate.getTime();
+        return Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 7));
     }
 
-    // Day counter (9 AM to 3 AM)
+    // Day counter (fixed 9 AM logic)
     function getDayPercentage() {
         const now = new Date();
         const currentHour = now.getHours();
         const dayPercentageElement = document.getElementById('day-percentage');
         
-        // Inactive hours (3 AM - 9 AM)
         if (currentHour >= 3 && currentHour < 9) {
             dayPercentageElement.classList.add('blink');
             return '--';
@@ -29,28 +29,30 @@ document.addEventListener('DOMContentLoaded', function () {
             dayPercentageElement.classList.remove('blink');
         }
 
-        // Active day calculation
-        const today9AM = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 9, 0, 0);
-        let activeDayStart = now < today9AM ? 
-            new Date(today9AM.getTime() - 86400000) : // Yesterday 9 AM
+        // Calculate active day (9 AM to 3 AM next day)
+        const today9AM = new Date(now);
+        today9AM.setHours(9, 0, 0, 0);
+        const activeDayStart = now < today9AM ? 
+            new Date(today9AM.getTime() - 86400000) : // Previous day 9 AM
             today9AM;
 
-        const activeDayEnd = new Date(activeDayStart.getTime() + 18 * 60 * 60 * 1000); // +18 hours
+        const activeDayEnd = new Date(activeDayStart.getTime() + 18 * 60 * 60 * 1000);
         const timePassed = Math.min(now - activeDayStart, activeDayEnd - activeDayStart);
         return ((timePassed / (18 * 60 * 60 * 1000)) * 100).toFixed(2);
     }
 
-    // Week counter (Monday 00:00 to Sunday 23:59)
+    // Week counter (fixed Monday start)
     function getWeekPercentage() {
         const now = new Date();
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7)); // Monday
         startOfWeek.setHours(0, 0, 0, 0);
-        const weekProgress = now - startOfWeek;
-        return ((weekProgress / (7 * 24 * 60 * 60 * 1000)) * 100).toFixed(2);
+        const weekDuration = 7 * 24 * 60 * 60 * 1000;
+        const timePassed = now - startOfWeek;
+        return ((timePassed / weekDuration) * 100).toFixed(2);
     }
 
-    // Clock color logic (no consecutive repeats)
+    // Clock color logic (no repeats)
     function getNonConsecutiveColor(colors, lastColor) {
         let newColor;
         do {
@@ -59,13 +61,12 @@ document.addEventListener('DOMContentLoaded', function () {
         return newColor;
     }
 
-    // 3-hour quadrant clock
+    // 3-hour clock (fixed color assignment)
     function updateThreeHourSegments() {
         const date = new Date();
         const currentHour = date.getHours();
         const segmentIndex = Math.floor(currentHour / 3) % 4;
         
-        // Generate 4 unique colors
         const colors = [];
         for (let i = 0; i < 4; i++) {
             lastQuadrantColor = getNonConsecutiveColor(quadrantColors, lastQuadrantColor);
@@ -80,13 +81,12 @@ document.addEventListener('DOMContentLoaded', function () {
         ], segmentIndex, colors);
     }
 
-    // 10-minute sector clock
+    // 10-minute clock (fixed color assignment)
     function updateTenMinuteIntervals() {
         const date = new Date();
         const currentMinute = date.getMinutes();
         const segmentIndex = Math.floor(currentMinute / 10);
         
-        // Generate 6 unique colors
         const colors = [];
         for (let i = 0; i < 6; i++) {
             lastSectorColor = getNonConsecutiveColor(sectorColors, lastSectorColor);
@@ -103,20 +103,14 @@ document.addEventListener('DOMContentLoaded', function () {
         ], segmentIndex, colors);
     }
 
-    // Canvas drawing (unchanged)
-    function setupCanvas(canvasId) {
-        const canvas = document.getElementById(canvasId);
-        canvas.width = 300;
-        canvas.height = 300;
-        return canvas;
-    }
-
+    // Canvas drawing (fixed fill logic)
     function drawCircleSegments(canvasId, segments, highlightIndex, colors) {
-        const canvas = setupCanvas(canvasId);
+        const canvas = document.getElementById(canvasId);
         const ctx = canvas.getContext('2d');
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         const radius = centerX - 10;
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.lineWidth = 2;
 
@@ -127,20 +121,24 @@ document.addEventListener('DOMContentLoaded', function () {
             ctx.closePath();
             ctx.strokeStyle = '#0000FF';
             ctx.stroke();
+            
             if (index === highlightIndex) {
-                ctx.fillStyle = colors[index % colors.length];
-                ctx.fill();
+                ctx.fillStyle = colors[index];
+                ctx.fill(); // Ensure fill is applied
             }
         });
     }
 
-    // Life overview (weeks left and life wasted)
+    // Life overview (fixed NaN issues)
     function updateLifeOverview() {
         const today = new Date();
+        
+        // Weeks left
         const weeksPassed = getWeeksBetween(countdownStartDate, today);
         const weeksLeft = 400 - weeksPassed;
         document.getElementById('weeks-left').textContent = `Weeks Left: ${Math.max(weeksLeft, 0)}`;
         
+        // Life wasted
         const totalLifeWeeks = retirementAge * 52;
         const weeksLived = getWeeksBetween(birthdate, today);
         const lifeWasted = (weeksLived / totalLifeWeeks * 100).toFixed(2);
@@ -152,12 +150,14 @@ document.addEventListener('DOMContentLoaded', function () {
     updateThreeHourSegments();
     updateTenMinuteIntervals();
 
-    // Update counters every second, clocks every minute
+    // Update every second
     setInterval(() => {
+        updateLifeOverview();
         document.getElementById('day-percentage').textContent = getDayPercentage();
         document.getElementById('week-percentage').textContent = getWeekPercentage();
-        updateLifeOverview();
     }, 1000);
+
+    // Update clocks every minute
     setInterval(updateThreeHourSegments, 60000);
     setInterval(updateTenMinuteIntervals, 60000);
 });
