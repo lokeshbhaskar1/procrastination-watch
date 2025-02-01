@@ -10,7 +10,7 @@ body {
     justify-content: center;
 }
 
-/* New Counter Styles */
+/* Counters */
 .counter-box {
     position: fixed;
     top: 20px;
@@ -39,28 +39,55 @@ body {
 .blink {
     animation: blink 3s infinite;
 }
-/* Ensure main container is below counters */
+
+/* Main container */
 #main-container {
-    margin-top: 80px; /* Add space for top counters */
+    text-align: center;
+    width: 80%;
+    margin-top: 80px; /* Space for counters */
 }
 
-/* Make life overview text bold and larger */
+h1 {
+    color: darkblue;
+    margin-bottom: 20px;
+}
+
 #life-overview p {
     font-size: 24px;
     font-weight: bold;
-    color: #2c3e50; /* Darker color for visibility */
+    color: #2c3e50;
     margin: 15px 0;
 }
 
-/* Fix canvas rendering */
-canvas {
-    display: block; /* Remove inline spacing issues */
-    margin: 0 auto; /* Center canvas */
+/* Circles */
+.circle {
+    width: 300px;
+    height: 300px;
+    margin: 20px;
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
 }
-/* Rest of existing CSS */
-#main-container { text-align: center; width: 80%; margin: 20px auto; }
-h1 { color: darkblue; margin-bottom: 20px; }
-#life-overview p { font-size: 20px; color: black; }
-.circle { width: 300px; height: 300px; margin: 20px; position: relative; display: inline-block; }
-#three-hour-segments h2, #ten-minute-intervals h2 { color: #000; margin-top: 0; }
-canvas { width: 100%; height: 100%; }
+
+canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    margin: 0 auto;
+}
+
+/* Time sections */
+#time-sections {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+h2 {
+    margin: 10px 0;
+    font-size: 20px;
+    color: #2c3e50;
+    text-align: center;
+}
