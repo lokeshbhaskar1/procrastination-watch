@@ -82,26 +82,25 @@ document.addEventListener('DOMContentLoaded', function () {
         ], newQuadrantIndex % 4, [lastQuadrantColor, '#ddd', '#ddd', '#ddd']);
     }
 
-    // 10-minute clock
-    function updateTenMinuteIntervals() {
-        const date = new Date();
-        const newSectorIndex = Math.floor(date.getMinutes() / 10); // 0 to 5
-        
-        // Change color only if sector changed
-        if (newSectorIndex !== currentSectorIndex) {
-            currentSectorIndex = newSectorIndex;
-            lastSectorColor = getNonConsecutiveColor(sectorColors, lastSectorColor);
-        }
-
-        drawCircleSegments('tenMinuteCanvas', [
-            { start: 0, end: Math.PI / 3 },
-            { start: Math.PI / 3, end: 2 * Math.PI / 3 },
-            { start: 2 * Math.PI / 3, end: Math.PI },
-            { start: Math.PI, end: 4 * Math.PI / 3 },
-            { start: 4 * Math.PI / 3, end: 5 * Math.PI / 3 },
-            { start: 5 * Math.PI / 3, end: 2 * Math.PI }
-        ], newSectorIndex, [lastSectorColor, '#ddd', '#ddd', '#ddd', '#ddd', '#ddd']);
+   function updateTenMinuteIntervals() {
+    const date = new Date();
+    // 1. Changed from 10 to 20 minutes division
+    const newSectorIndex = Math.floor(date.getMinutes() / 20); // Now 0-2
+    
+    if (newSectorIndex !== currentSectorIndex) {
+        currentSectorIndex = newSectorIndex;
+        lastSectorColor = getNonConsecutiveColor(sectorColors, lastSectorColor);
     }
+
+    // 2. Updated segments for 3 sectors (120deg each)
+    drawCircleSegments('tenMinuteCanvas', [
+        { start: 0, end: 2 * Math.PI / 3 },
+        { start: 2 * Math.PI / 3, end: 4 * Math.PI / 3 },
+        { start: 4 * Math.PI / 3, end: 2 * Math.PI }
+    ], newSectorIndex, 
+    // 3. Updated colors array length to match 3 sectors
+    [lastSectorColor, '#ddd', '#ddd']); 
+}
 
     // Canvas drawing
     function setupCanvas(canvasId) {
