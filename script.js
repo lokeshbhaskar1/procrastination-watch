@@ -4,62 +4,28 @@ document.addEventListener('DOMContentLoaded', function () {
     const retirementAge = 42;
     const countdownStartDate = new Date('2025-01-31T00:00:00');
 
-    // Color pools
-    const quadrantColors = ['#FF0000', '#00FF00', '#0000FF', '#FFD700', '#FF00FF', '#00FFFF', '#FFA500', '#800080'];
-    const sectorColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEEAD', '#D4A5A5'];
+    // Function to generate random colors
+    function getRandomColor() {
+        const letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
 
+    // Generate random colors for both clocks
     let lastQuadrantColor = null;
     let lastSectorColor = null;
-    let currentQuadrantIndex = -1;  // Track last quadrant
-    let currentSectorIndex = -1;    // Track last sector
+    let currentQuadrantIndex = -1;
+    let currentSectorIndex = -1;
 
-    // Helper: Weeks between dates
-    function getWeeksBetween(startDate, endDate) {
-        const timeDiff = endDate.getTime() - startDate.getTime();
-        return Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 7));
-    }
-
-    // Day counter
-    function getDayPercentage() {
-        const now = new Date();
-        const currentHour = now.getHours();
-        const dayPercentageElement = document.getElementById('day-percentage');
-        
-        if (currentHour >= 3 && currentHour < 9) {
-            dayPercentageElement.classList.add('blink');
-            return '--';
-        } else {
-            dayPercentageElement.classList.remove('blink');
-        }
-
-        const today9AM = new Date(now);
-        today9AM.setHours(9, 0, 0, 0);
-        const activeDayStart = now < today9AM ? 
-            new Date(today9AM.getTime() - 86400000) : 
-            today9AM;
-
-        const activeDayEnd = new Date(activeDayStart.getTime() + 18 * 60 * 60 * 1000);
-        const timePassed = Math.min(now - activeDayStart, activeDayEnd - activeDayStart);
-        return ((timePassed / (18 * 60 * 60 * 1000)) * 100).toFixed(2);
-    }
-
-    // Week counter
-    function getWeekPercentage() {
-        const now = new Date();
-        const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-        startOfWeek.setHours(0, 0, 0, 0);
-        const weekDuration = 7 * 24 * 60 * 60 * 1000;
-        const timePassed = now - startOfWeek;
-        return ((timePassed / weekDuration) * 100).toFixed(2);
-    }
-
-    // Clock color logic
-    function getNonConsecutiveColor(colors, lastColor) {
+    // Helper function to get a non-consecutive and non-matching color
+    function getNonConsecutiveColor(colors, lastColor, otherClockColor) {
         let newColor;
         do {
             newColor = colors[Math.floor(Math.random() * colors.length)];
-        } while (newColor === lastColor);
+        } while (newColor === lastColor || newColor === otherClockColor);
         return newColor;
     }
 
@@ -67,11 +33,15 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateThreeHourSegments() {
         const date = new Date();
         const newQuadrantIndex = Math.floor(date.getHours() / 3); // 0 to 7
-        
+
         // Change color only if quadrant changed
         if (newQuadrantIndex !== currentQuadrantIndex) {
             currentQuadrantIndex = newQuadrantIndex;
-            lastQuadrantColor = getNonConsecutiveColor(quadrantColors, lastQuadrantColor);
+            lastQuadrantColor = getNonConsecutiveColor(
+                Array.from({ length: 12 }, () => getRandomColor()), // Generate 12 random colors
+                lastQuadrantColor,
+                lastSectorColor // Ensure it doesn't match the 20-minute interval color
+            );
         }
 
         drawCircleSegments('threeHourCanvas', [
@@ -82,25 +52,27 @@ document.addEventListener('DOMContentLoaded', function () {
         ], newQuadrantIndex % 4, [lastQuadrantColor, '#ddd', '#ddd', '#ddd']);
     }
 
-   function updateTenMinuteIntervals() {
-    const date = new Date();
-    // 1. Changed from 10 to 20 minutes division
-    const newSectorIndex = Math.floor(date.getMinutes() / 20); // Now 0-2
-    
-    if (newSectorIndex !== currentSectorIndex) {
-        currentSectorIndex = newSectorIndex;
-        lastSectorColor = getNonConsecutiveColor(sectorColors, lastSectorColor);
-    }
+    // 20-minute clock
+    function updateTenMinuteIntervals() {
+        const date = new Date();
+        const newSectorIndex = Math.floor(date.getMinutes() / 20); // 0 to 2
 
-    // 2. Updated segments for 3 sectors (120deg each)
-    drawCircleSegments('tenMinuteCanvas', [
-        { start: 0, end: 2 * Math.PI / 3 },
-        { start: 2 * Math.PI / 3, end: 4 * Math.PI / 3 },
-        { start: 4 * Math.PI / 3, end: 2 * Math.PI }
-    ], newSectorIndex, 
-    // 3. Updated colors array length to match 3 sectors
-    [lastSectorColor, '#ddd', '#ddd']); 
-}
+        // Change color only if sector changed
+        if (newSectorIndex !== currentSectorIndex) {
+            currentSectorIndex = newSectorIndex;
+            lastSectorColor = getNonConsecutiveColor(
+                Array.from({ length: 12 }, () => getRandomColor()), // Generate 12 random colors
+                lastSectorColor,
+                lastQuadrantColor // Ensure it doesn't match the 3-hour segment color
+            );
+        }
+
+        drawCircleSegments('tenMinuteCanvas', [
+            { start: 0, end: 2 * Math.PI / 3 },
+            { start: 2 * Math.PI / 3, end: 4 * Math.PI / 3 },
+            { start: 4 * Math.PI / 3, end: 2 * Math.PI }
+        ], newSectorIndex, [lastSectorColor, '#ddd', '#ddd']);
+    }
 
     // Canvas drawing
     function setupCanvas(canvasId) {
@@ -152,6 +124,47 @@ document.addEventListener('DOMContentLoaded', function () {
         const weeksLived = getWeeksBetween(birthdate, today);
         const lifeWasted = (weeksLived / totalLifeWeeks * 100).toFixed(2);
         document.getElementById('percentage-wasted').textContent = `Percentage of Life Wasted: ${lifeWasted}%`;
+    }
+
+    // Helper: Weeks between dates
+    function getWeeksBetween(startDate, endDate) {
+        const timeDiff = endDate.getTime() - startDate.getTime();
+        return Math.floor(timeDiff / (1000 * 60 * 60 * 24 * 7));
+    }
+
+    // Day counter
+    function getDayPercentage() {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const dayPercentageElement = document.getElementById('day-percentage');
+        
+        if (currentHour >= 3 && currentHour < 9) {
+            dayPercentageElement.classList.add('blink');
+            return '--';
+        } else {
+            dayPercentageElement.classList.remove('blink');
+        }
+
+        const today9AM = new Date(now);
+        today9AM.setHours(9, 0, 0, 0);
+        const activeDayStart = now < today9AM ? 
+            new Date(today9AM.getTime() - 86400000) : 
+            today9AM;
+
+        const activeDayEnd = new Date(activeDayStart.getTime() + 18 * 60 * 60 * 1000);
+        const timePassed = Math.min(now - activeDayStart, activeDayEnd - activeDayStart);
+        return ((timePassed / (18 * 60 * 60 * 1000)) * 100).toFixed(2);
+    }
+
+    // Week counter
+    function getWeekPercentage() {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        startOfWeek.setHours(0, 0, 0, 0);
+        const weekDuration = 7 * 24 * 60 * 60 * 1000;
+        const timePassed = now - startOfWeek;
+        return ((timePassed / weekDuration) * 100).toFixed(2);
     }
 
     // Initialize
